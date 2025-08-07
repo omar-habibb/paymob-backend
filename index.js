@@ -35,14 +35,19 @@ app.post('/start-checkout', async (req, res) => {
     } else {
       res.status(400).json({ error: "No checkout URL received." });
     }
-  } catch (error) {
-    
-    console.error("Checkout error:");
-console.error("Response Data:", error.response?.data);
-console.error("Full Error:", error.toJSON ? error.toJSON() : error);
+  } } catch (error) {
+  console.error("❌ PAYMOB UNIFIED CHECKOUT ERROR ❌");
 
-    res.status(500).json({ error: "Something went wrong with Paymob checkout." });
+  if (error.response) {
+    console.error("🔹 Status Code:", error.response.status);
+    console.error("🔹 Response Data:", error.response.data);
+  } else {
+    console.error("🔸 General Error:", error.message);
   }
+
+  res.status(500).json({ error: "Something went wrong with Paymob checkout." });
+}
+
 });
 
 const PORT = 3000;
