@@ -1,57 +1,42 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-require('dotenv').config();
-
 const app = express();
-const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-app.post('/start-payment', async (req, res) => {
+const PAYMOB_PUBLIC_KEY = process.env.PAYMOB_PUBLIC_KEY;
+
+app.post('/start-checkout', async (req, res) => {
   try {
     const { amount_cents, billing_data } = req.body;
 
-    // Step 1: Get auth token
-    const auth = await axios.post('https://accept.paymob.com/api/auth/tokens', {
-      api_key: process.env.API_KEY
-    });
-
-    const token = auth.data.token;
-
-    // Step 2: Create order
-    const order = await axios.post('https://accept.paymob.com/api/ecommerce/orders', {
-      auth_token: token,
-      delivery_needed: false,
+    const checkoutRequest = {
+      public_key: PAYMOB_PUBLIC_KEY,
       amount_cents: amount_cents,
       currency: "EGP",
-      items: []
-    });
-
-    const orderId = order.data.id;
-
-    // Step 3: Create payment key
-    const paymentKey = await axios.post('https://accept.paymob.com/api/acceptance/payment_keys', {
-      auth_token: token,
-      amount_cents: amount_cents,
-      expiration: 3600,
-      order_id: orderId,
       billing_data: billing_data,
-      currency: "EGP",
-      integration_id: process.env.INTEGRATION_ID
-    });
+      delivery_needed: false,
+      items: [],
+      success_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html", // change this!
+      cancel_url: "https://yourdomain.com/failed.html"     // optional
+    };
 
-    const iframe_url = `https://accept.paymob.com/api/acceptance/iframes/${process.env.IFRAME_ID}?payment_token=${paymentKey.data.token}`;
+    const response = await axios.post('https://accept.paymob.com/api/ecommerce/checkout', checkoutRequest);
+    const { redirect_url } = response.data;
 
-    res.json({ iframe_url });
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ error: 'Something went wrong', details: err.message });
+    if (redirect_url) {
+      res.json({ checkout_url: redirect_url });
+    } else {
+      res.status(400).json({ error: "No checkout URL received." });
+    }
+  } catch (error) {
+    console.error("Checkout error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Something went wrong with Paymob checkout." });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-});
- 
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
