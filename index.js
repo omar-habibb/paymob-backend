@@ -4,58 +4,56 @@ const axios = require('axios');
 const cors = require('cors');
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
 const PAYMOB_PUBLIC_KEY = process.env.PAYMOB_PUBLIC_KEY;
+const PAYMOB_SECRET_KEY = process.env.PAYMOB_SECRET_KEY;
 
 app.post('/start-checkout', async (req, res) => {
   try {
     const { amount_cents, billing_data } = req.body;
 
-    // Log incoming request data (optional)
-    console.log("📩 Received checkout request:");
-    console.log("Amount:", amount_cents);
-    console.log("Billing Data:", billing_data);
-
-    const checkoutRequest = {
-      public_key: PAYMOB_PUBLIC_KEY,
+    const intentionBody = {
       amount_cents,
       currency: "EGP",
+      integration_id: YOUR_INTEGRATION_ID, // <- Replace this with your real Integration ID
       billing_data,
-      delivery_needed: false,
       items: [],
-      success_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
-      cancel_url: "https://omar-habibb.github.io/optimum-auto/cancel.html" // optional
+      redirection_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
+      notification_url: "https://webhook.site/your-test-webhook-url" // Optional for now
     };
 
-    const response = await axios.post(
-      'https://accept.paymob.com/api/acceptance/unified_checkout',
-      checkoutRequest
+    const paymobResponse = await axios.post(
+      "https://accept.paymob.com/v1/intention/",
+      intentionBody,
+      {
+        headers: {
+          Authorization: `Bearer ${PAYMOB_SECRET_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
     );
 
-    const { redirect_url } = response.data;
+    const { client_secret } = paymobResponse.data;
 
-    if (redirect_url) {
-      console.log("✅ Checkout URL:", redirect_url);
-      res.json({ checkout_url: redirect_url });
+    if (client_secret) {
+      const checkout_url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${client_secret}`;
+      return res.json({ checkout_url });
     } else {
-      console.log("⚠️ No redirect_url returned.");
-      res.status(400).json({ error: "No checkout URL received." });
+      return res.status(400).json({ error: "Missing client secret from Paymob response." });
     }
 
   } catch (error) {
-    console.error("❌ PAYMOB UNIFIED CHECKOUT ERROR ❌");
-
+    console.error("❌ PAYMOB INTENTION API ERROR ❌");
     if (error.response) {
-      console.error("🔹 Status Code:", error.response.status);
-      console.error("🔹 Response Data:", error.response.data);
+      console.error("Status:", error.response.status);
+      console.error("Response:", error.response.data);
     } else {
-      console.error("🔸 General Error:", error.message);
+      console.error("General Error:", error.message);
     }
 
-    res.status(500).json({ error: "Something went wrong with Paymob checkout." });
+    return res.status(500).json({ error: "Something went wrong creating the intention." });
   }
 });
 
