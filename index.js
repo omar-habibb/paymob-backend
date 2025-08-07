@@ -26,7 +26,7 @@ app.post('/start-checkout', async (req, res) => {
       cancel_url: "https://yourdomain.com/failed.html"     // optional
     };
 
-    const response = await axios.post('https://accept.paymob.com/api/ecommerce/checkout', checkoutRequest);
+    const response = await axios.post('https://accept.paymob.com/api/acceptance/unified_checkout', checkoutRequest);
     console.log("Paymob Response:", response.data);
     const { redirect_url } = response.data;
 
