@@ -17,7 +17,7 @@ app.post('/start-checkout', async (req, res) => {
     const intentionBody = {
       amount_cents,
       currency: "EGP",
-      integration_id: YOUR_INTEGRATION_ID, // <- Replace this with your real Integration ID
+      integration_id: parseInt(process.env.INTEGRATION_ID), // ✅ From env
       billing_data,
       items: [],
       redirection_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
