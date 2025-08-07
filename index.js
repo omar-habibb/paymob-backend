@@ -36,7 +36,11 @@ app.post('/start-checkout', async (req, res) => {
       res.status(400).json({ error: "No checkout URL received." });
     }
   } catch (error) {
-    console.error("Checkout error:", error.response?.data || error.message);
+    
+    console.error("Checkout error:");
+console.error("Response Data:", error.response?.data);
+console.error("Full Error:", error.toJSON ? error.toJSON() : error);
+
     res.status(500).json({ error: "Something went wrong with Paymob checkout." });
   }
 });
