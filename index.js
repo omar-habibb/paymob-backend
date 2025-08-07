@@ -11,6 +11,8 @@ const PAYMOB_PUBLIC_KEY = process.env.PAYMOB_PUBLIC_KEY;
 
 app.post('/start-checkout', async (req, res) => {
   try {
+    console.log("Incoming data:", req.body);
+
     const { amount_cents, billing_data } = req.body;
 
     const checkoutRequest = {
