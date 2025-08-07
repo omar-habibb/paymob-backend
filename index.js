@@ -25,6 +25,7 @@ app.post('/start-checkout', async (req, res) => {
     };
 
     const response = await axios.post('https://accept.paymob.com/api/ecommerce/checkout', checkoutRequest);
+    console.log("Paymob Response:", response.data);
     const { redirect_url } = response.data;
 
     if (redirect_url) {
