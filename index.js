@@ -9,6 +9,9 @@ app.use(express.json());
 
 const PAYMOB_PUBLIC_KEY = process.env.PAYMOB_PUBLIC_KEY;
 const PAYMOB_SECRET_KEY = process.env.PAYMOB_SECRET_KEY;
+console.log("🧪 PAYMOB_PUBLIC_KEY:", process.env.PAYMOB_PUBLIC_KEY);
+console.log("🧪 PAYMOB_SECRET_KEY:", process.env.PAYMOB_SECRET_KEY);
+console.log("🧪 PAYMOB_INTEGRATION_ID:", process.env.PAYMOB_INTEGRATION_ID);
 
 app.post('/start-checkout', async (req, res) => {
   try {
@@ -17,7 +20,7 @@ app.post('/start-checkout', async (req, res) => {
     const intentionBody = {
       amount_cents,
       currency: "EGP",
-      integration_id: parseInt(process.env.INTEGRATION_ID), // ✅ From env
+      integration_id: parseInt(process.env.PAYMOB_INTEGRATION_ID),
       billing_data,
       items: [],
       redirection_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
