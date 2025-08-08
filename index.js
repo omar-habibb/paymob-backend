@@ -1,63 +1,76 @@
-try {
-  require('dotenv').config();
-  const express = require('express');
-  const axios = require('axios');
-  const cors = require('cors');
-  const app = express();
+require('dotenv').config();
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
 
-  app.use(cors());
-  app.use(express.json());
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-  const PAYMOB_SECRET_KEY = process.env.PAYMOB_SECRET_KEY;
-  const PAYMOB_PUBLIC_KEY = process.env.PAYMOB_PUBLIC_KEY;
-  const PAYMOB_INTEGRATION_ID = parseInt(process.env.PAYMOB_INTEGRATION_ID);
+// Show this message if someone visits the backend in a browser
+app.get('/', (req, res) => {
+  res.send('Backend is alive 🧠');
+});
 
-  app.get("/", (req, res) => {
-    res.send("✅ Backend is alive!");
-  });
+app.post('/start-checkout', async (req, res) => {
+  try {
+    const { amount, billing_data } = req.body;
 
-  app.post('/start-checkout', async (req, res) => {
-    try {
-      const { amount, billing_data } = req.body;
+const intentionPayload = {
+  amount,
+  currency: "EGP",
+  payment_methods: ["card",parseInt(process.env.PAYMOB_INTEGRATION_ID)],
+  billing_data,
+  items: [],
+  redirection_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
+  notification_url: "https://webhook.site/your-temporary-test-url"
+};
 
-      const checkoutRequest = {
-        amount,
-        currency: "EGP",
-        payment_methods: ["card", PAYMOB_INTEGRATION_ID],
-        billing_data,
-        items: [],
-        redirection_url: "https://yourdomain.com/thankyou",
-        notification_url: "https://yourdomain.com/webhook"
-      };
 
-      const paymobResponse = await axios.post(
-        "https://accept.paymob.com/v1/intention/",
-        checkoutRequest,
-        {
-          headers: {
-            Authorization: `Bearer ${PAYMOB_SECRET_KEY}`,
-            "Content-Type": "application/json"
-          }
+    const response = await axios.post(
+      "https://accept.paymob.com/v1/intention/",
+      intentionPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYMOB_SECRET_KEY}`,
+          "Content-Type": "application/json"
         }
-      );
+      }
+    );
 
-      const { client_secret } = paymobResponse.data;
-      const checkoutUrl = `https://accept.paymob.com/unifiedcheckout/?publicKey=${PAYMOB_PUBLIC_KEY}&clientSecret=${client_secret}`;
-      res.json({ checkout_url: checkoutUrl });
+    const { client_secret } = response.data;
 
-    } catch (error) {
-      res.status(500).json({
-        error: error.response?.data || "Unexpected error"
-      });
+    if (client_secret) {
+      const checkout_url = `https://accept.paymob.com/unifiedcheckout/?publicKey=${process.env.PAYMOB_PUBLIC_KEY}&clientSecret=${client_secret}`;
+      res.json({ checkout_url });
+    } else {
+      res.status(400).json({ error: "Missing client_secret in response." });
     }
-  });
+} catch (error) {
+  console.error("❌ Paymob Error ❌");
 
-  app.all("*", (req, res) => {
-    res.status(404).send("❌ Route not found: " + req.path);
-  });
+  let errorDetails;
 
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT);
-} catch (e) {
-  // startup errors only
+  if (error.response) {
+    console.error("Status:", error.response.status);
+    console.error("Data:", error.response.data);
+    errorDetails = error.response.data;
+  } else {
+    console.error("Error:", error.message);
+    errorDetails = error.message;
+  }
+
+  // Only send a response if one hasn’t been sent yet
+  if (!res.headersSent) {
+    res.status(500).json({ error: errorDetails });
+  }
 }
+
+
+});
+
+// This line is very important for Railway
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
