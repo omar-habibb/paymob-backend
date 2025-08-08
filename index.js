@@ -11,7 +11,7 @@ const PAYMOB_PUBLIC_KEY = process.env.PAYMOB_PUBLIC_KEY;
 const PAYMOB_SECRET_KEY = process.env.PAYMOB_SECRET_KEY;
 const PAYMOB_INTEGRATION_ID = parseInt(process.env.PAYMOB_INTEGRATION_ID);
 console.log("Paymob Integration ID:", PAYMOB_INTEGRATION_ID);
-console.log("Paymob Secret Key:", PAYMOB_SECRET_KEY?.slice(0, 10) + "...");
+console.log("Paymob Secret Key:", PAYMOB_SECRET_KEY);
 console.log("Paymob Public Key:", PAYMOB_PUBLIC_KEY);
 app.post('/start-checkout', async (req, res) => {
   try {
