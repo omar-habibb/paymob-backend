@@ -8,9 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // Show this message if someone visits the backend in a browser
-app.get('/', (req, res) => {
-  res.send('Backend is alive 🧠');
-});
+
 
 app.post('/start-checkout', async (req, res) => {
   try {
