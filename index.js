@@ -16,10 +16,7 @@ console.log("Paymob Public Key:", PAYMOB_PUBLIC_KEY);
 app.post('/start-checkout', async (req, res) => {
   try {
     const { amount, billing_data } = req.body;
-    console.log("Paymob Integration ID:", PAYMOB_INTEGRATION_ID);
-console.log("Paymob Secret Key:", PAYMOB_SECRET_KEY?.slice(0, 10) + "...");
-console.log("Paymob Public Key:", PAYMOB_PUBLIC_KEY);
-
+   
     const intentionBody = {
       amount,
       currency: "EGP",
