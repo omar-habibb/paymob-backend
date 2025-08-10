@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 
 app.post('/start-checkout', async (req, res) => {
   try {
-    const { amount, billing_data,redirection_url } = req.body;
+    const { amount, billing_data } = req.body;
 
 const intentionPayload = {
   amount,
@@ -22,7 +22,7 @@ const intentionPayload = {
   payment_methods: ["card",parseInt(process.env.PAYMOB_INTEGRATION_ID)],
   billing_data,
   items: [],
-  redirection_url: redirection_url || "https://omar-habibb.github.io/optimum-auto/thankyou.html",
+  redirection_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
   notification_url: "https://webhook.site/your-temporary-test-url"
 };
 
