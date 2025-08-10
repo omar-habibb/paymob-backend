@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 
 app.post('/start-checkout', async (req, res) => {
   try {
-    const { amount, billing_data } = req.body;
+    const { amount, billing_data,redirection_url } = req.body;
 
 const intentionPayload = {
   amount,
