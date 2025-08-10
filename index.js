@@ -8,7 +8,9 @@ app.use(cors());
 app.use(express.json());
 
 // Show this message if someone visits the backend in a browser
-
+app.get('/', (req, res) => {
+  res.send('Backend is alive 🧠');
+});
 
 app.post('/start-checkout', async (req, res) => {
   try {
@@ -20,7 +22,7 @@ const intentionPayload = {
   payment_methods: ["card",parseInt(process.env.PAYMOB_INTEGRATION_ID)],
   billing_data,
   items: [],
-  redirection_url: "https://omar-habibb.github.io/optimum-auto/thankyou.html",
+  redirection_url: redirection_url || "https://omar-habibb.github.io/optimum-auto/thankyou.html",
   notification_url: "https://webhook.site/your-temporary-test-url"
 };
 
